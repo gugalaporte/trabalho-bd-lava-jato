@@ -1,0 +1,8 @@
+.DS_Store
+interface/target/
+etapa03/interface/target/
+*.env
+.env*
+
+.git-backup-caiosenas/
+.old-remote.txt
