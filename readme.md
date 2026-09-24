@@ -1,6 +1,6 @@
 # Sistema Lava Jato
 
-Projeto acadêmico de banco de dados (BD 2026.1). Sistema de lava jato com Spring Boot + JDBC + MySQL e interface web em HTML/CSS/JS.
+Projeto acadêmico de banco de dados (BD 2026.2). Sistema de lava jato com Spring Boot + JDBC + MySQL e interface web em HTML/CSS/JS.
 
 ## Pré-Requisitos
 
