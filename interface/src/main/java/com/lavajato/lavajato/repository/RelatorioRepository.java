@@ -18,72 +18,50 @@ public class RelatorioRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public List<Map<String, Object>> servicosComFaturamentoMinimo(BigDecimal faturamentoMinimo) {
+    // Etapa 04 - Consulta 01: anti-join
+    public List<Map<String, Object>> funcionariosSemAtendimento() {
         return jdbcTemplate.queryForList(
                 """
                         SELECT
-                            s.id_servico,
-                            s.nome_servico,
-                            COUNT(a.id_atendimento) AS total_execucoes,
-                            SUM(p.valor_total - p.descontos) AS faturamento_liquido
-                        FROM servico s
-                        JOIN atendimento a
-                            ON a.id_servico = s.id_servico
-                        JOIN pagamento p
-                            ON p.id_atendimento = a.id_atendimento
-                        WHERE a.status = 'finalizado'
-                        GROUP BY s.id_servico, s.nome_servico
-                        HAVING SUM(p.valor_total - p.descontos) >= ?
-                        ORDER BY faturamento_liquido DESC
-                        """,
-                faturamentoMinimo);
-    }
-
-    public List<Map<String, Object>> atendimentosFinalizadosPorPeriodo(LocalDate dataInicio, LocalDate dataFim) {
-        return jdbcTemplate.queryForList(
-                """
-                        SELECT
-                            a.id_atendimento,
-                            c.nome AS cliente,
-                            s.nome_servico,
-                            a.data,
-                            a.hora,
-                            a.status
-                        FROM atendimento a
-                        JOIN cliente c
-                            ON c.id_cliente = a.id_cliente_veiculo
-                        JOIN servico s
-                            ON s.id_servico = a.id_servico
-                        WHERE a.status = 'finalizado'
-                          AND a.data BETWEEN ? AND ?
-                        ORDER BY a.data, a.hora
-                        """,
-                dataInicio,
-                dataFim);
-    }
-
-    public List<Map<String, Object>> atendimentosSemPagamento() {
-        return jdbcTemplate.queryForList(
-                """
-                        SELECT
-                            a.id_atendimento,
-                            c.nome AS cliente,
-                            s.nome_servico,
-                            a.data,
-                            a.hora,
-                            a.status
-                        FROM atendimento a
-                        JOIN cliente c
-                            ON c.id_cliente = a.id_cliente_veiculo
-                        JOIN servico s
-                            ON s.id_servico = a.id_servico
-                        LEFT JOIN pagamento p
-                            ON p.id_atendimento = a.id_atendimento
-                        WHERE p.id_pagamento IS NULL
-                        ORDER BY a.data, a.hora
+                            f.id_funcionario,
+                            f.nome,
+                            f.cargo
+                        FROM funcionario f
+                        LEFT JOIN realiza r
+                            ON r.id_funcionario = f.id_funcionario
+                        WHERE r.id_atendimento IS NULL
+                        ORDER BY f.nome
                         """);
     }
 
+    // Etapa 04 - Consulta 02: full outer join emulado (LEFT UNION RIGHT)
+    public List<Map<String, Object>> clienteVeiculoFullOuter() {
+        return jdbcTemplate.queryForList(
+                """
+                        SELECT
+                            c.id_cliente,
+                            c.nome AS cliente,
+                            v.placa,
+                            v.modelo,
+                            'cliente_com_ou_sem_veiculo' AS origem
+                        FROM cliente c
+                        LEFT JOIN veiculo v
+                            ON v.id_cliente = c.id_cliente
+                        UNION
+                        SELECT
+                            c.id_cliente,
+                            c.nome AS cliente,
+                            v.placa,
+                            v.modelo,
+                            'veiculo_com_cliente' AS origem
+                        FROM cliente c
+                        RIGHT JOIN veiculo v
+                            ON v.id_cliente = c.id_cliente
+                        ORDER BY id_cliente, placa
+                        """);
+    }
+
+    // Etapa 04 - Consulta 03: subconsulta 1
     public List<Map<String, Object>> clientesComAvaliacaoAcimaDaMedia() {
         return jdbcTemplate.queryForList(
                 """
@@ -91,7 +69,8 @@ public class RelatorioRepository {
                             c.id_cliente,
                             c.nome,
                             av.nota,
-                            av.comentarios
+                            av.comentarios,
+                            av.data
                         FROM avaliacao av
                         JOIN cliente c
                             ON c.id_cliente = av.id_cliente
@@ -103,6 +82,29 @@ public class RelatorioRepository {
                         """);
     }
 
+    // Etapa 04 - Consulta 04: subconsulta 2
+    public List<Map<String, Object>> servicosComPrecoAcimaDaMedia() {
+        return jdbcTemplate.queryForList(
+                """
+                        SELECT
+                            s.id_servico,
+                            s.nome_servico,
+                            s.preco,
+                            (
+                                SELECT COUNT(*)
+                                FROM atendimento a
+                                WHERE a.id_servico = s.id_servico
+                                  AND a.status = 'finalizado'
+                            ) AS total_finalizados
+                        FROM servico s
+                        WHERE s.preco > (
+                            SELECT AVG(s2.preco)
+                            FROM servico s2
+                        )
+                        ORDER BY s.preco DESC, s.nome_servico
+                        """);
+    }
+
     public List<Map<String, Object>> viewAtendimentosFinalizados() {
         return jdbcTemplate.queryForList(
                 "SELECT * FROM vw_atendimentos_finalizados_detalhados ORDER BY data DESC, hora DESC");
@@ -110,7 +112,7 @@ public class RelatorioRepository {
 
     public List<Map<String, Object>> viewClientesComBoasAvaliacoes() {
         return jdbcTemplate.queryForList(
-                "SELECT * FROM vw_clientes_com_boas_avaliacoes ORDER BY nota DESC, nome");
+                "SELECT * FROM vw_clientes_com_boas_avaliacoes ORDER BY nota DESC, nome, id_atendimento");
     }
 
     public BigDecimal valorLiquidoAtendimento(Integer idAtendimento) {

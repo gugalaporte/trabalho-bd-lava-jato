@@ -2,20 +2,22 @@ USE lava_jato;
 
 -- =========================================================
 -- ETAPA 04 - SQL DOS INDICES
--- Execute este arquivo depois de create_tables.sql e insert_data.sql.
+-- Execute depois de create_tables.sql e insert_data.sql.
 -- Os CREATE INDEX devem ser executados apenas uma vez.
 -- =========================================================
 
 -- Indice 01
 -- Justificativa:
--- Esta combinacao melhora filtros por status e periodo.
--- Ela eh usada na Consulta 02 e na View 01.
+-- Acelera filtros por status (e ordenacao/periodo por data) em atendimento.
+-- Usado na View 01 (WHERE status = 'finalizado') e na subconsulta da
+-- Consulta 04 (contagem de atendimentos finalizados por servico).
 CREATE INDEX idx_atendimento_status_data
 ON atendimento (status, data);
 
 -- Indice 02
 -- Justificativa:
--- Esta combinacao melhora filtros por nota e o join com cliente.
--- Ela eh usada na Consulta 04 e na View 02.
+-- Acelera filtros e ordenacao por nota, alem do join com cliente.
+-- Usado na Consulta 03 (nota > media), na View 02 (nota >= media)
+-- e no relacionamento avaliacao -> cliente.
 CREATE INDEX idx_avaliacao_nota_cliente
 ON avaliacao (nota, id_cliente);

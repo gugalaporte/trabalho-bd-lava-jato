@@ -724,14 +724,6 @@ function instalarCadastros() {
 }
 
 function montarUrlRelatorio(tipo) {
-  if (tipo === 'consulta-faturamento') {
-    return `/relatorios/${tipo}?minimo=${encodeURIComponent($('filtroFaturamento').value || 60)}`;
-  }
-  if (tipo === 'consulta-atendimentos-periodo') {
-    const inicio = encodeURIComponent($('filtroInicio').value || '2026-04-10');
-    const fim = encodeURIComponent($('filtroFim').value || '2026-04-20');
-    return `/relatorios/${tipo}?inicio=${inicio}&fim=${fim}`;
-  }
   return `/relatorios/${tipo}`;
 }
 

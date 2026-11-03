@@ -89,7 +89,7 @@ Veja `etapa03/readme.md`.
 ## O Que A Interface Tem
 
 - CRUD de clientes, serviços, veículos, funcionários, atendimentos e avaliações
-- 4 consultas e 2 views da Etapa 04
+- 4 consultas da Etapa 04 (anti-join, full outer emulado, 2 subconsultas) e 2 views
 - Funções, procedures (incluindo uma com cursor) e triggers da Etapa 05
 - Dashboard com indicadores, estatísticas descritivas e 5 gráficos
 

@@ -180,18 +180,13 @@
     </section>
 
     <section id="relatorios" class="painel">
-      <div class="barra-filtros">
-        <label>Faturamento minimo <input type="number" id="filtroFaturamento" value="60" step="0.01"></label>
-        <label>Inicio <input type="date" id="filtroInicio" value="2026-04-10"></label>
-        <label>Fim <input type="date" id="filtroFim" value="2026-04-20"></label>
-      </div>
       <div class="grade-botoes">
-        <button type="button" data-relatorio="consulta-faturamento">Faturamento por servico</button>
-        <button type="button" data-relatorio="consulta-atendimentos-periodo">Atendimentos por periodo</button>
-        <button type="button" data-relatorio="consulta-atendimentos-sem-pagamento">Atendimentos sem pagamento</button>
-        <button type="button" data-relatorio="consulta-clientes-acima-media">Clientes acima da media</button>
-        <button type="button" data-relatorio="view-atendimentos-finalizados">Atendimentos finalizados</button>
-        <button type="button" data-relatorio="view-clientes-boas-avaliacoes">Clientes bem avaliados</button>
+        <button type="button" data-relatorio="consulta-funcionarios-sem-atendimento">Anti-join: funcionarios sem atendimento</button>
+        <button type="button" data-relatorio="consulta-cliente-veiculo-full-outer">Full outer: cliente e veiculo</button>
+        <button type="button" data-relatorio="consulta-clientes-acima-media">Subconsulta: avaliacoes acima da media</button>
+        <button type="button" data-relatorio="consulta-servicos-preco-acima-media">Subconsulta: servicos acima da media</button>
+        <button type="button" data-relatorio="view-atendimentos-finalizados">View: atendimentos finalizados</button>
+        <button type="button" data-relatorio="view-clientes-boas-avaliacoes">View: boas avaliacoes</button>
       </div>
       <article class="bloco largura-total">
         <h2 id="tituloRelatorio">Resultado</h2>

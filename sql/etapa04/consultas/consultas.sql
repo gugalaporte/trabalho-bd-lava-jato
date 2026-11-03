@@ -2,74 +2,64 @@ USE lava_jato;
 
 -- =========================================================
 -- ETAPA 04 - SQL DAS CONSULTAS
--- Execute este arquivo depois de create_tables.sql e insert_data.sql.
+-- Execute depois de create_tables.sql e insert_data.sql.
+-- 4 consultas novas:
+--   1 anti-join, 1 full outer join (emulado), 2 com subconsultas.
 -- =========================================================
 
--- Consulta 01
--- Join + Group By + Having
--- Lista servicos finalizados com faturamento liquido minimo.
+-- Consulta 01 — Anti Join (esquerda)
+-- Justificativa:
+-- Lista funcionarios que ainda nao participaram de nenhum atendimento
+-- (nao aparecem na tabela associativa REALIZA).
 SELECT
-    s.id_servico,
-    s.nome_servico,
-    COUNT(a.id_atendimento) AS total_execucoes,
-    SUM(p.valor_total - p.descontos) AS faturamento_liquido
-FROM servico s
-JOIN atendimento a
-    ON a.id_servico = s.id_servico
-JOIN pagamento p
-    ON p.id_atendimento = a.id_atendimento
-WHERE a.status = 'finalizado'
-GROUP BY s.id_servico, s.nome_servico
-HAVING SUM(p.valor_total - p.descontos) >= 60
-ORDER BY faturamento_liquido DESC;
+    f.id_funcionario,
+    f.nome,
+    f.cargo
+FROM funcionario f
+LEFT JOIN realiza r
+    ON r.id_funcionario = f.id_funcionario
+WHERE r.id_atendimento IS NULL
+ORDER BY f.nome;
 
--- Consulta 02
--- 2 Joins + Where
--- Mostra atendimentos finalizados em um intervalo de datas.
+-- Consulta 02 — Full Outer Join (emulado no MySQL com UNION)
+-- Justificativa:
+-- O MySQL nao possui FULL OUTER JOIN nativo.
+-- A uniao de LEFT JOIN com RIGHT JOIN cobre:
+--   - clientes com e sem veiculo
+--   - veiculos associados a clientes
+-- Assim a consulta mostra o relacionamento completo cliente/veiculo.
 SELECT
-    a.id_atendimento,
+    c.id_cliente,
     c.nome AS cliente,
-    s.nome_servico,
-    a.data,
-    a.hora,
-    a.status
-FROM atendimento a
-JOIN cliente c
-    ON c.id_cliente = a.id_cliente_veiculo
-JOIN servico s
-    ON s.id_servico = a.id_servico
-WHERE a.status = 'finalizado'
-  AND a.data BETWEEN '2026-04-10' AND '2026-04-20'
-ORDER BY a.data, a.hora;
+    v.placa,
+    v.modelo,
+    'cliente_com_ou_sem_veiculo' AS origem
+FROM cliente c
+LEFT JOIN veiculo v
+    ON v.id_cliente = c.id_cliente
 
--- Consulta 03
--- Anti Join pela esquerda
--- Lista atendimentos que ainda nao possuem pagamento registrado.
+UNION
+
 SELECT
-    a.id_atendimento,
+    c.id_cliente,
     c.nome AS cliente,
-    s.nome_servico,
-    a.data,
-    a.hora,
-    a.status
-FROM atendimento a
-JOIN cliente c
-    ON c.id_cliente = a.id_cliente_veiculo
-JOIN servico s
-    ON s.id_servico = a.id_servico
-LEFT JOIN pagamento p
-    ON p.id_atendimento = a.id_atendimento
-WHERE p.id_pagamento IS NULL
-ORDER BY a.data, a.hora;
+    v.placa,
+    v.modelo,
+    'veiculo_com_cliente' AS origem
+FROM cliente c
+RIGHT JOIN veiculo v
+    ON v.id_cliente = c.id_cliente
+ORDER BY id_cliente, placa;
 
--- Consulta 04
--- Subconsulta
--- Lista clientes com avaliacao acima da media geral.
+-- Consulta 03 — Subconsulta 1
+-- Justificativa:
+-- Compara cada avaliacao com a media geral de notas (subconsulta escalar).
 SELECT
     c.id_cliente,
     c.nome,
     av.nota,
-    av.comentarios
+    av.comentarios,
+    av.data
 FROM avaliacao av
 JOIN cliente c
     ON c.id_cliente = av.id_cliente
@@ -78,3 +68,24 @@ WHERE av.nota > (
     FROM avaliacao av2
 )
 ORDER BY av.nota DESC, c.nome;
+
+-- Consulta 04 — Subconsulta 2
+-- Justificativa:
+-- Lista servicos cujo preco esta acima da media do catalogo
+-- e que ja foram executados em pelo menos um atendimento finalizado.
+SELECT
+    s.id_servico,
+    s.nome_servico,
+    s.preco,
+    (
+        SELECT COUNT(*)
+        FROM atendimento a
+        WHERE a.id_servico = s.id_servico
+          AND a.status = 'finalizado'
+    ) AS total_finalizados
+FROM servico s
+WHERE s.preco > (
+    SELECT AVG(s2.preco)
+    FROM servico s2
+)
+ORDER BY s.preco DESC, s.nome_servico;

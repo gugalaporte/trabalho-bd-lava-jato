@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Map;
 
@@ -24,29 +23,24 @@ public class RelatorioController {
         this.relatorioRepository = relatorioRepository;
     }
 
-    @GetMapping("/consulta-faturamento")
-    public Object servicosComFaturamentoMinimo(
-            @RequestParam(defaultValue = "60") BigDecimal minimo) {
-        return relatorioRepository.servicosComFaturamentoMinimo(minimo);
+    @GetMapping("/consulta-funcionarios-sem-atendimento")
+    public Object funcionariosSemAtendimento() {
+        return relatorioRepository.funcionariosSemAtendimento();
     }
 
-    @GetMapping("/consulta-atendimentos-periodo")
-    public Object atendimentosFinalizadosPorPeriodo(
-            @RequestParam(defaultValue = "2026-04-10")
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
-            @RequestParam(defaultValue = "2026-04-20")
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim) {
-        return relatorioRepository.atendimentosFinalizadosPorPeriodo(inicio, fim);
-    }
-
-    @GetMapping("/consulta-atendimentos-sem-pagamento")
-    public Object atendimentosSemPagamento() {
-        return relatorioRepository.atendimentosSemPagamento();
+    @GetMapping("/consulta-cliente-veiculo-full-outer")
+    public Object clienteVeiculoFullOuter() {
+        return relatorioRepository.clienteVeiculoFullOuter();
     }
 
     @GetMapping("/consulta-clientes-acima-media")
     public Object clientesComAvaliacaoAcimaDaMedia() {
         return relatorioRepository.clientesComAvaliacaoAcimaDaMedia();
+    }
+
+    @GetMapping("/consulta-servicos-preco-acima-media")
+    public Object servicosComPrecoAcimaDaMedia() {
+        return relatorioRepository.servicosComPrecoAcimaDaMedia();
     }
 
     @GetMapping("/view-atendimentos-finalizados")
