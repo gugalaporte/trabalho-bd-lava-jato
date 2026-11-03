@@ -21,10 +21,9 @@ O projeto completo (etapas 04, 05 e 06) continua na raiz do repositório.
 etapa03/
 |- modelo/          mini-mundo, esquemas e dicionário
 |- sql/
-|  |- create_tables.sql
-|  |- insert_data.sql
-|  |- consultas.sql      ← entregável 2
-|- interface/            ← entregável 1 (código da app)
+|  |- create_and_insert.sql   ← criação + inserção (arquivo unico)
+|  |- consultas.sql           ← entregável 2
+|- interface/                 ← entregável 1 (código da app)
 |- readme.md
 ```
 
@@ -32,11 +31,10 @@ etapa03/
 
 ### 1. Banco
 
-No MySQL, execute na ordem:
+No MySQL, execute:
 
 ```text
-etapa03/sql/create_tables.sql
-etapa03/sql/insert_data.sql
+etapa03/sql/create_and_insert.sql
 ```
 
 (`consultas.sql` é para inspeção/demonstração; a interface já executa as mesmas consultas.)

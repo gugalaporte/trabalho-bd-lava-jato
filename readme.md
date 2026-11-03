@@ -15,8 +15,7 @@ Projeto acadêmico de banco de dados (BD 2026.2). Sistema de lava jato com Sprin
 No MySQL, execute na ordem:
 
 ```text
-sql/create_tables.sql
-sql/insert_data.sql
+sql/create_and_insert.sql
 sql/etapa04/visoes/visoes.sql
 sql/etapa04/indices/indices.sql
 sql/etapa05/log/log_operacao.sql
